@@ -1,4 +1,5 @@
 import { google } from "googleapis";
+import generateCalendarEventFromMessage from "./genAI.mjs";
 
 import dotenv from "dotenv";
 dotenv.config();
@@ -9,16 +10,9 @@ auth.setCredentials({ access_token: accessToken });
 
 const calendar = google.calendar({ version: "v3", auth });
 
-const event = {
-  summary: "Discuss about UI with the UI Team leads",
-  description: "A meeting to discuss UI matters with the UI Team leads.",
-  start: {
-    dateTime: "2024-04-14T14:00:00Z",
-  },
-  end: {
-    dateTime: "2024-04-14T15:00:00Z",
-  },
-};
+const event = await generateCalendarEventFromMessage(
+  "Team brainstorming session about product roadmap on Friday at 9 am - let's get creative!"
+);
 
 async function createCalendarEvent() {
   try {
