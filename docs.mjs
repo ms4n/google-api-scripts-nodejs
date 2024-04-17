@@ -45,17 +45,19 @@ async function createDocFile(parentFolderId = undefined) {
 
 // console.log(await createDocFile());
 
+const date = Date.now().toString();
+
 const requests = [
   {
     insertText: {
       endOfSegmentLocation: { segmentId: "" },
-      text: "text1\n\n",
+      text: `In Google Docs, multiple lines of text usually belong within a paragraph. It's generally preferable to manipulate paragraphs as a whole using the API (e.g., inserting a new paragraph with your text) if you want more styling control over the spacing.\t\t ${date} \n\n`,
     },
   },
   {
     insertText: {
       endOfSegmentLocation: { segmentId: "" },
-      text: "text2\n\n",
+      text: `Date: ${date}\nWe calculate the endIndex. This is a simplified approach; you'll likely need adjustments if your document has complex structures (headers, footers, multiple text elements).\n\n`,
     },
   },
   {
@@ -67,7 +69,7 @@ const requests = [
 ];
 
 const doc = await service.documents.batchUpdate({
-  documentId: "",
+  documentId: "1xxY7qQXXXHCTtoVSyjnRK9_BHGHnOCY4JXfSQuoNwiQ",
   resource: { requests: requests },
 });
 
