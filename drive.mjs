@@ -107,4 +107,6 @@ async function uploadFile(
   }
 }
 
-await uploadFile("files/bike.jpg", "bike.jpg", "WhatNot");
+// await uploadFile("files/bike.jpg", "bike.jpg", "WhatNot");
+
+export default { findFolder, createFolder, uploadFile };
