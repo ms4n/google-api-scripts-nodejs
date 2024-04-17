@@ -45,25 +45,25 @@ async function createDocFile(parentFolderId = undefined) {
 
 // console.log(await createDocFile());
 
-const date = Date.now().toString();
+const date = new Date(); // Get the current date and time
+const formattedDate = date.toLocaleDateString("en-us", {
+  weekday: "short",
+  year: "numeric",
+  month: "short",
+  day: "numeric",
+});
+
+// To add hours and minutes:
+const hours = ("0" + date.getHours()).slice(-2);
+const minutes = ("0" + date.getMinutes()).slice(-2);
+const seconds = ("0" + date.getSeconds()).slice(-2);
+const formattedTime = `${hours}:${minutes}:${seconds}`;
 
 const requests = [
   {
     insertText: {
-      endOfSegmentLocation: { segmentId: "" },
-      text: `In Google Docs, multiple lines of text usually belong within a paragraph. It's generally preferable to manipulate paragraphs as a whole using the API (e.g., inserting a new paragraph with your text) if you want more styling control over the spacing.\t\t ${date} \n\n`,
-    },
-  },
-  {
-    insertText: {
-      endOfSegmentLocation: { segmentId: "" },
-      text: `Date: ${date}\nWe calculate the endIndex. This is a simplified approach; you'll likely need adjustments if your document has complex structures (headers, footers, multiple text elements).\n\n`,
-    },
-  },
-  {
-    insertText: {
-      endOfSegmentLocation: { segmentId: "" },
-      text: "text3\n\n",
+      endOfSegmentLocation: { segmentId: "" }, // Appends to the body segment
+      text: `Date: ${formattedTime} ${formattedDate} \nFor a long time, I've used libraries like Date-fns whenever I need to format dates in JavaScript. But it gets really weird whenever I do this in small projects that require simple date formats which JavaScript offers by default.\n\n`,
     },
   },
 ];
@@ -73,4 +73,4 @@ const doc = await service.documents.batchUpdate({
   resource: { requests: requests },
 });
 
-console.log(doc);
+console.log(doc.status);

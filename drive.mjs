@@ -1,9 +1,13 @@
 import { google } from "googleapis";
 import fs from "fs";
 import mime from "mime-types";
+import axios from "axios";
+import { Readable } from "stream";
 
 import dotenv from "dotenv";
 dotenv.config();
+
+const WHATSAPP_API_ACCESS_TOKEN = process.env.WHATSAPP_API_ACCESS_TOKEN;
 
 const accessToken = process.env.ACCESS_TOKEN;
 const auth = new google.auth.OAuth2();
@@ -109,4 +113,65 @@ async function uploadFile(
 
 // await uploadFile("files/bike.jpg", "bike.jpg", "WhatNot");
 
-export default { findFolder, createFolder, uploadFile };
+// export default { findFolder, createFolder, uploadFile };
+
+async function getMediaObjectFromId(mediaId) {
+  const url = `https://graph.facebook.com/v19.0/${mediaId}/`;
+  const headers = {
+    Authorization: `Bearer ${WHATSAPP_API_ACCESS_TOKEN}`,
+  };
+  const res = await axios.get(url, { headers }).catch((error) => {
+    // Handle error
+    console.error("Error:", error);
+  });
+
+  return res.data;
+}
+
+async function downloadAndUploadMedia(message) {
+  try {
+    // Make sure there's a valid media URL
+    if (!message.url) {
+      console.error("No media URL found in the message.");
+      return;
+    }
+
+    // Download the media from WhatsApp
+    const response = await axios.get(message.url, {
+      responseType: "arraybuffer", // Ensure binary response
+      headers: { Authorization: `Bearer ${WHATSAPP_API_ACCESS_TOKEN}` },
+    });
+
+    // Infer MIME type - you may get this from the content-type response header
+    const mimeType = message.mime_type;
+
+    // Determine a suitable filename (consider using media IDs to avoid duplicates)
+    const fileName = `${message.id}.${mime.extension(mimeType)}`;
+
+    const mediaStream = Readable.from(response.data);
+
+    // Directly upload binary data to Google Drive
+    const fileMetadata = {
+      name: fileName,
+      parents: ["1BpeSmiYyZPrUpEQgSSJqAcGa7RC02MkK"], // Find or create the folder
+    };
+
+    const media = {
+      mimeType: mimeType,
+      body: mediaStream, // Create buffer from arraybuffer
+    };
+
+    const file = await service.files.create({
+      resource: fileMetadata,
+      media: media,
+      fields: "id",
+    });
+
+    console.log("File Id:", file.data.id);
+  } catch (err) {
+    console.error("Media Download and Upload Error: ", err);
+  }
+}
+
+const media = await getMediaObjectFromId("8106834526012688");
+await downloadAndUploadMedia(media);
